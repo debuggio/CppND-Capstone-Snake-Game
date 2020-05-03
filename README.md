@@ -29,3 +29,6 @@ In this project, you can build your own C++ application or extend this Snake gam
 2. Make a build directory in the top level directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./SnakeGame`.
+
+# Updates from original version
+* added mines. When snake eats food it also spawns mine that ends the game if snake eats it
