@@ -2,10 +2,14 @@
 #define GAME_H
 
 #include <random>
+#include <set>
 #include "SDL.h"
 #include "controller.h"
 #include "renderer.h"
 #include "snake.h"
+#include "mine.h"
+
+using std::vector;
 
 class Game {
  public:
@@ -18,6 +22,7 @@ class Game {
  private:
   Snake snake;
   SDL_Point food;
+  set<Mine> mines;
 
   std::random_device dev;
   std::mt19937 engine;
@@ -27,6 +32,7 @@ class Game {
   int score{0};
 
   void PlaceFood();
+  void PlaceMine();  
   void Update();
 };
 

@@ -1,4 +1,5 @@
 #include "game.h"
+#include "mine.h"
 #include <iostream>
 #include "SDL.h"
 
@@ -25,7 +26,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
     Update();
-    renderer.Render(snake, food);
+    renderer.Render(snake, food, mines);
 
     frame_end = SDL_GetTicks();
 
@@ -65,6 +66,21 @@ void Game::PlaceFood() {
   }
 }
 
+void Game::PlaceMine() {
+  int x, y;
+  while (true) {
+    x = random_w(engine);
+    y = random_h(engine);
+    // Check that the location is not occupied by a snake item before placing
+    // food.
+    Mine mine(x, y);
+    if (!snake.SnakeCell(x, y) && food.x != x && food.y != y && !mines.count(mine)) {  
+      mines.insert(std::move(mine));
+      return;
+    }
+  }
+}
+
 void Game::Update() {
   if (!snake.alive) return;
 
@@ -77,9 +93,15 @@ void Game::Update() {
   if (food.x == new_x && food.y == new_y) {
     score++;
     PlaceFood();
+    PlaceMine();
     // Grow snake and increase speed.
     snake.GrowBody();
     snake.speed += 0.02;
+  }
+  
+  // Check if snake hit a mine
+  if (mines.count(Mine(new_x, new_y))) {
+    snake.alive = false;
   }
 }
 

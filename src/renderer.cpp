@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include <iostream>
 #include <string>
+#include <set>
 
 Renderer::Renderer(const std::size_t screen_width,
                    const std::size_t screen_height,
@@ -28,9 +29,15 @@ Renderer::Renderer(const std::size_t screen_width,
   // Create renderer
   sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED);
   if (nullptr == sdl_renderer) {
-    std::cerr << "Renderer could not be created.\n";
+    std::cerr << "Renderer could not be created. Trying software render...\n";
     std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
   }
+
+  sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_SOFTWARE);
+  if (nullptr == sdl_renderer) {
+    std::cerr << "Software Renderer could not be created.\n";
+    std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
+  }  
 }
 
 Renderer::~Renderer() {
@@ -38,7 +45,7 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
-void Renderer::Render(Snake const snake, SDL_Point const &food) {
+void Renderer::Render(Snake const snake, SDL_Point const &food, set<Mine> const &mines) {
   SDL_Rect block;
   block.w = screen_width / grid_width;
   block.h = screen_height / grid_height;
@@ -52,6 +59,15 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
   block.x = food.x * block.w;
   block.y = food.y * block.h;
   SDL_RenderFillRect(sdl_renderer, &block);
+
+  // Render mine
+  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+  for (auto mine : mines)
+  {
+    block.x = mine.GetLocation().x * block.w;
+    block.y = mine.GetLocation().y * block.h;
+    SDL_RenderFillRect(sdl_renderer, &block);
+  }
 
   // Render snake's body
   SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
